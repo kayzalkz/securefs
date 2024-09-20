@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Facial Recognition System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --primary-color: #00ffff;
+            --secondary-color: #ffff00;
+            --background-color: #001a1a;
+            --text-color: #ffffff;
+            --error-color: #ff0000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .panel {
+            background-color: rgba(0, 255, 255, 0.05);
+            border: 1px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .main-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+
+        #videoElement {
+            width: 100%;
+            max-width: 640px;
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        #captureButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 18px;
+            color: var(--background-color);
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        #captureButton:hover {
+            background-color: var(--secondary-color);
+            box-shadow: 0 0 20px var(--secondary-color);
+        }
+
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .error {
+            color: var(--error-color);
+            text-shadow: 0 0 10px var(--error-color);
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .code-window {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            font-size: 12px;
+            line-height: 1.4;
+            background-color: rgba(0, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .code-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            animation: scroll-up 30s linear infinite;
+        }
+
+        @keyframes scroll-up {
+            0% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
+        }
+
+        .data-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .data-item {
+            text-align: center;
+        }
+
+        .data-value {
+            font-size: 24px;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .data-label {
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 26, 26, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--primary-color);
+            border-top: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: var(--primary-color);
+            animation: progress 5s linear infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .virtual-keyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+        }
+
+        .key {
+            background-color: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+            padding: 5px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--secondary-color);
+        }
+
+        .radar {
+            width: 150px;
+            height: 150px;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .radar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(from 0deg, transparent 0deg 180deg, var(--primary-color) 180deg 360deg);
+            animation: radar-scan 4s linear infinite;
+            transform-origin: 0 0;
+        }
+
+        @keyframes radar-scan {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel side-panel">
+            <div class="code-window">
+                <pre class="code-content" id="hackingLog"></pre>
+            </div>
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
+        </div>
+        <div class="panel main-panel">
+            <h1>Advanced Facial Recognition System</h1>
+            <video id="videoElement" autoplay playsinline></video>
+            <button id="captureButton">Initiate Scan</button>
+            <p id="status"></p>
+            <div class="data-display">
+                <div class="data-item">
+                    <div class="data-value" id="scanCount">0</div>
+                    <div class="data-label">Scans</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-value" id="successRate">0%</div>
+                    <div class="data-label">Success Rate</div>
+                </div>
+            </div>
+            <div class="virtual-keyboard">
+                <div class="key">1</div>
+                <div class="key">2</div>
+                <div class="key">3</div>
+                <div class="key">4</div>
+                <div class="key">5</div>
+                <div class="key">6</div>
+                <div class="key">7</div>
+                <div class="key">8</div>
+                <div class="key">9</div>
+                <div class="key">0</div>
+                <div class="key">Q</div>
+                <div class="key">W</div>
+                <div class="key">E</div>
+                <div class="key">R</div>
+                <div class="key">T</div>
+                <div class="key">Y</div>
+                <div class="key">U</div>
+                <div class="key">I</div>
+                <div class="key">O</div>
+                <div class="key">P</div>
+            </div>
+        </div>
+        <div class="panel side-panel">
+            <div class="radar"></div>
+            <div class="code-window">
+                <pre class="code-content" id="codeSnippets"></pre>
+            </div>
+        </div>
+    </div>
+    <div id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoElement');
+        const captureButton = document.getElementById('captureButton');
+        const status = document.getElementById('status');
+        const hackingLog = document.getElementById('hackingLog');
+        const codeSnippets = document.getElementById('codeSnippets');
+        const scanCount = document.getElementById('scanCount');
+        const successRate = document.getElementById('successRate');
+        const loading = document.getElementById('loading');
+
+        let totalScans = 0;
+        let successfulScans = 0;
+
+        async function setupCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                addHackingLog("Camera initialized. Facial recognition system online.");
+            } catch (error) {
+                console.error('Error accessing the camera:', error);
+                status.textContent = 'Error: Camera access denied.';
+                status.classList.add('error');
+                addHackingLog("Error: Camera initialization failed.");
+            }
+        }
+
+        function addHackingLog(message) {
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            hackingLog.appendChild(logEntry);
+            if (hackingLog.childElementCount > 20) {
+                hackingLog.removeChild(hackingLog.firstChild);
+            }
+        }
+
+        function addCodeSnippet() {
+            const snippets = [
+                "function hackMainframe() {",
+                "  const firewall = new Firewall();",
+                "  firewall.bypass();",
+                "  const securityProtocols = decrypt(mainframeAccess);",
+                "  injectPayload(securityProtocols);",
+                "}",
+                "async function crackEncryption(key) {",
+                "  const algorithm = await fetchAlgorithm(key);",
+                "  return bruteForce(algorithm);",
+                "}",
+                "class NeuralNetwork {",
+                "  constructor(layers) {",
+                "    this.layers = layers;",
+                "    this.synapses = generateSynapses(layers);",
+                "  }",
+                "  train(data) {",
+                "    // Implementation hidden",
+                "  }",
+                "}",
+                "function analyzeRetinalPattern(image) {",
+                "  const features = extractFeatures(image);",
+                "  return matchDatabase(features);",
+                "}"
+            ];
+            const snippet = snippets[Math.floor(Math.random() * snippets.length)];
+            const codeElement = document.createElement('div');
+            codeElement.textContent = snippet;
+            codeSnippets.appendChild(codeElement);
+            if (codeSnippets.childElementCount > 20) {
+                codeSnippets.removeChild(codeSnippets.firstChild);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupCamera();
+            setInterval(addCodeSnippet, 1000);
+        });
+
+        captureButton.addEventListener('click', async () => {
+            try {
+                loading.style.display = 'flex';
+                addHackingLog("Initiating facial scan sequence...");
+                
+                if (!video.srcObject) {
+                    addHackingLog("No video feed detected. Reinitializing camera...");
+                    await setupCamera();
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                const imageDataUrl = canvas.toDataURL('image/jpeg');
+
+                status.textContent = 'Analyzing facial structure...';
+                addHackingLog("Processing biometric data...");
+
+                const response = await fetch('/verify_face', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: imageDataUrl }),
+                });
+
+                const result = await response.json();
+
+                totalScans++;
+                if (result.success) {
+                    successfulScans++;
+                    status.textContent = 'Access granted. Welcome, user.';
+                    addHackingLog("Facial recognition successful. Granting system access.");
+                    setTimeout(() => { window.location.href = '/index'; }, 2000);
+                } else {
+                    status.textContent = 'Access denied. Unauthorized facial pattern detected.';
+                    status.classList.add('error');
+                    addHackingLog("Facial recognition failed. Access denied.");
+                }
+
+                scanCount.textContent =
+
+ totalScans;
+                successRate.textContent = `${Math.round((successfulScans / totalScans) * 100)}%`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                status.textContent = 'System malfunction. Please retry facial scan.';
+                status.classList.add('error');
+                addHackingLog(`Error: Facial scan process terminated unexpectedly. ${error.message}`);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

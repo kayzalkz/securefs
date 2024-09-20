@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Uploaded Successfully</title>
+     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-color: #0d1117;
+            --card-bg-color: #161b22;
+            --text-color: #c9d1d9;
+            --primary-color: #58a6ff;
+            --button-color: #238636;
+            --button-hover-color: #2ea043;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background-color: #ffffff;
+            opacity: 0;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .container {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            margin-bottom: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 28px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        a:hover {
+            opacity: 0.8;
+        }
+
+        .qr-code {
+            margin-top: 32px;
+        }
+
+        .qr-code img {
+            max-width: 200px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: var(--button-color);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            font-weight: 600;
+            margin-top: 24px;
+        }
+
+        .button:hover {
+            background-color: var(--button-hover-color);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="background" id="starry-background"></div>
+    <div class="container">
+        <h1>File Uploaded Successfully</h1>
+        <p>Your file has been uploaded. You can share it using the following link:</p>
+        <a href="{{ file_url }}">{{ file_url }}</a>
+        <div class="qr-code">
+            <h2>Scan this QR code to download the file:</h2>
+            <img src="{{ qr_url }}" alt="QR Code">
+        </div>
+        <a href="{{ url_for('index') }}" class="button">Upload another file</a>
+    </div>
+
+    <script>
+        function createStars() {
+            const starryBackground = document.getElementById('starry-background');
+            const numberOfStars = 100;
+
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                starryBackground.appendChild(star);
+            }
+        }
+
+        createStars();
+    </script>
+</body>
+</html>
